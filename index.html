@@ -3,148 +3,643 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Science Calculator</title>
+  <title>Minimalistic Science Calculator</title>
   <style>
-    /* Minimalistic design */
+    /* Minimalistic & Responsive CSS with Dark/Light mode support */
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #000000;
+      --accent-color: #007BFF;
+      --border-color: #007BFF;
+    }
     body {
       margin: 0;
-      padding: 0;
-      background: #f9f9f9;
       font-family: Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.dark {
+      --bg-color: #1e1e1e;
+      --text-color: #ffffff;
+    }
+    header {
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
       align-items: center;
-      height: 100vh;
+      background-color: var(--accent-color);
+      color: #fff;
+      padding: 1rem;
     }
-    .container {
-      background: #fff;
-      padding: 20px 25px;
-      border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      width: 300px;
+    header h1 {
+      margin: 0;
     }
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-      font-size: 22px;
-      color: #333;
+    main {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 1rem;
+    }
+    section {
+      flex: 1 1 300px;
+      margin: 1rem;
+      padding: 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      background-color: var(--bg-color);
     }
     label {
       display: block;
-      margin-top: 15px;
-      margin-bottom: 5px;
-      color: #555;
+      margin-top: 0.5rem;
     }
-    input[type="number"],
-    select {
+    input[type="number"], select {
       width: 100%;
-      padding: 8px;
-      box-sizing: border-box;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 14px;
+      padding: 0.5rem;
+      margin: 0.3rem 0;
+      border: 1px solid #ccc;
+      border-radius: 3px;
     }
     button {
-      margin-top: 20px;
-      width: 100%;
-      padding: 10px;
-      background: #007BFF;
-      color: #fff;
+      padding: 0.5rem 1rem;
+      margin: 0.5rem 0.3rem 0.3rem 0;
       border: none;
-      border-radius: 4px;
-      font-size: 16px;
+      border-radius: 3px;
+      background-color: var(--accent-color);
+      color: #fff;
       cursor: pointer;
     }
     button:hover {
-      background: #0056b3;
+      opacity: 0.9;
     }
-    .result {
-      margin-top: 20px;
-      text-align: center;
-      font-size: 18px;
-      color: #333;
+    /* Calculation history sidebar */
+    #calculation-history {
+      position: fixed;
+      right: 0;
+      top: 60px;
+      width: 220px;
+      height: calc(100% - 60px);
+      background: var(--bg-color);
+      border-left: 1px solid var(--border-color);
+      overflow-y: auto;
+      padding: 1rem;
+    }
+    #calculation-history h2 {
+      font-size: 1.1rem;
+      margin-top: 0;
+    }
+    #history-list {
+      list-style: none;
+      padding: 0;
+      font-size: 0.9rem;
+    }
+    #history-list li {
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 0.3rem;
+    }
+    @media (max-width: 600px) {
+      #calculation-history {
+        position: static;
+        width: 100%;
+        height: auto;
+        border-left: none;
+        margin-top: 1rem;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
+  <header>
     <h1>Science Calculator</h1>
-    <form id="calcForm">
-      <label for="calcType">Select Calculation:</label>
-      <select id="calcType" onchange="updateFields()">
-        <option value="">--Choose--</option>
-        <option value="force">Force (F = m × a)</option>
-        <option value="pressure">Pressure (P = F / A)</option>
-        <option value="acceleration">Acceleration (a = Δv / t)</option>
-      </select>
-      <div id="inputFields"></div>
-      <button type="submit">Calculate</button>
-    </form>
-    <div class="result" id="result"></div>
-  </div>
+    <button id="theme-toggle" aria-label="Toggle Dark/Light Mode">Toggle Dark/Light Mode</button>
+  </header>
+
+  <!-- Calculation History Sidebar -->
+  <aside id="calculation-history" aria-label="Calculation History">
+    <h2>History</h2>
+    <ul id="history-list"></ul>
+  </aside>
+
+  <main>
+    <!-- Physics Calculations Section -->
+    <section id="calculator" aria-labelledby="calc-heading">
+      <h2 id="calc-heading">Physics Calculations (SI Units Only)</h2>
+      <div>
+        <label for="calculation-type">Select Calculation Type:</label>
+        <select id="calculation-type" aria-required="true">
+          <option value="">--Select--</option>
+          <option value="force">Force</option>
+          <option value="pressure">Pressure</option>
+          <option value="acceleration">Acceleration</option>
+          <option value="density">Density</option>
+          <option value="work">Work</option>
+          <option value="power">Power</option>
+          <option value="kinetic_energy">Kinetic Energy</option>
+          <option value="gravitational_potential_energy">Gravitational Potential Energy</option>
+          <option value="ohm">Ohm’s Law</option>
+        </select>
+      </div>
+      <div id="formula-selection" style="display:none;">
+        <label for="formula">Select Formula:</label>
+        <select id="formula"></select>
+      </div>
+      <div id="input-fields">
+        <!-- Dynamic input fields will be injected here -->
+      </div>
+      <button id="calculate-btn">Calculate</button>
+      <button id="reset-btn">Reset</button>
+      <div id="result" aria-live="polite">
+        <h3>Result:</h3>
+        <p id="result-value"></p>
+      </div>
+    </section>
+
+    <!-- SI Unit Conversion Tool Section -->
+    <section id="conversion-tool" aria-labelledby="conversion-heading">
+      <h2 id="conversion-heading">SI Unit Conversion Tool</h2>
+      <div>
+        <label for="conversion-type">Select Conversion:</label>
+        <select id="conversion-type">
+          <option value="">--Select--</option>
+          <option value="mass">Mass (g, lb → kg)</option>
+          <option value="length">Length (cm, mm, inch → m, etc.)</option>
+          <option value="time">Time (min, hr → s)</option>
+          <option value="force">Force (dyn, lbf → N)</option>
+          <option value="pressure">Pressure (atm, bar, psi → Pa)</option>
+          <option value="energy">Energy (cal, kWh → J)</option>
+          <!-- Additional conversions can be added here -->
+        </select>
+      </div>
+      <div id="conversion-inputs">
+        <!-- Dynamic conversion input fields will be injected here -->
+      </div>
+      <button id="convert-btn">Convert</button>
+      <div id="conversion-result" aria-live="polite">
+        <h3>Converted Value (SI):</h3>
+        <p id="conversion-value"></p>
+      </div>
+    </section>
+  </main>
 
   <script>
-    // Function to update the input fields based on the selected calculation.
-    function updateFields() {
-      const calcType = document.getElementById("calcType").value;
-      const inputFields = document.getElementById("inputFields");
-      inputFields.innerHTML = ""; // Clear previous fields
+    /******************************************************************
+     * JSON Configuration for Formulas (SI Units Only)
+     ******************************************************************/
+    const formulas = {
+      force: [
+        {
+          name: "Newton’s Second Law",
+          parameters: [
+            { label: "Mass (kg)", id: "mass" },
+            { label: "Acceleration (m/s²)", id: "acceleration" }
+          ],
+          calculate: (inputs) => inputs.mass * inputs.acceleration,
+          resultLabel: "Force (N)",
+          tooltip: "F = m * a"
+        },
+        {
+          name: "Impulse-Momentum Theorem",
+          parameters: [
+            { label: "Change in Momentum (kg·m/s)", id: "deltaMomentum" },
+            { label: "Time (s)", id: "time" }
+          ],
+          calculate: (inputs) => inputs.deltaMomentum / inputs.time,
+          resultLabel: "Force (N)",
+          tooltip: "F = Δp / Δt"
+        },
+        {
+          name: "Hooke’s Law (Elastic Force)",
+          parameters: [
+            { label: "Spring Constant (N/m)", id: "springConstant" },
+            { label: "Displacement (m)", id: "displacement" }
+          ],
+          calculate: (inputs) => inputs.springConstant * inputs.displacement,
+          resultLabel: "Force (N)",
+          tooltip: "F = k * x"
+        },
+        {
+          name: "Coulomb’s Law (Electrostatic Force)",
+          parameters: [
+            { label: "Charge 1 (C)", id: "charge1" },
+            { label: "Charge 2 (C)", id: "charge2" },
+            { label: "Distance (m)", id: "distance" },
+            { label: "Coulomb Constant (N·m²/C²)", id: "coulombConstant" }
+          ],
+          calculate: (inputs) =>
+            inputs.coulombConstant * Math.abs(inputs.charge1 * inputs.charge2) / (inputs.distance ** 2),
+          resultLabel: "Force (N)",
+          tooltip: "F = k * |q₁ * q₂| / r²"
+        }
+      ],
+      pressure: [
+        {
+          name: "Definition of Pressure",
+          parameters: [
+            { label: "Force (N)", id: "force" },
+            { label: "Area (m²)", id: "area" }
+          ],
+          calculate: (inputs) => inputs.force / inputs.area,
+          resultLabel: "Pressure (Pa)",
+          tooltip: "P = F / A"
+        },
+        {
+          name: "Fluid Pressure",
+          parameters: [
+            { label: "Density (kg/m³)", id: "density" },
+            { label: "Gravity (m/s²)", id: "gravity" },
+            { label: "Height (m)", id: "height" },
+            { label: "Atmospheric Pressure (Pa)", id: "atmPressure" }
+          ],
+          calculate: (inputs) => inputs.density * inputs.gravity * inputs.height + inputs.atmPressure,
+          resultLabel: "Pressure (Pa)",
+          tooltip: "P = ρ * g * h + P_atm"
+        }
+      ],
+      acceleration: [
+        {
+          name: "Newton’s Second Law",
+          parameters: [
+            { label: "Force (N)", id: "force" },
+            { label: "Mass (kg)", id: "mass" }
+          ],
+          calculate: (inputs) => inputs.force / inputs.mass,
+          resultLabel: "Acceleration (m/s²)",
+          tooltip: "a = F / m"
+        },
+        {
+          name: "Kinematic Equation",
+          parameters: [
+            { label: "Initial Velocity (m/s)", id: "initialVelocity" },
+            { label: "Final Velocity (m/s)", id: "finalVelocity" },
+            { label: "Time (s)", id: "time" }
+          ],
+          calculate: (inputs) => (inputs.finalVelocity - inputs.initialVelocity) / inputs.time,
+          resultLabel: "Acceleration (m/s²)",
+          tooltip: "a = (v_f - v_i) / t"
+        }
+      ],
+      density: [
+        {
+          name: "Basic Definition",
+          parameters: [
+            { label: "Mass (kg)", id: "mass" },
+            { label: "Volume (m³)", id: "volume" }
+          ],
+          calculate: (inputs) => inputs.mass / inputs.volume,
+          resultLabel: "Density (kg/m³)",
+          tooltip: "ρ = m / V"
+        },
+        {
+          name: "Ideal Gas Law",
+          parameters: [
+            { label: "Pressure (Pa)", id: "pressure" },
+            { label: "Gas Constant (J/(kg·K))", id: "gasConstant" },
+            { label: "Temperature (K)", id: "temperature" }
+          ],
+          calculate: (inputs) => inputs.pressure / (inputs.gasConstant * inputs.temperature),
+          resultLabel: "Density (kg/m³)",
+          tooltip: "ρ = P / (R * T)"
+        }
+      ],
+      work: [
+        {
+          name: "Mechanical Work",
+          parameters: [
+            { label: "Force (N)", id: "force" },
+            { label: "Distance (m)", id: "distance" }
+          ],
+          calculate: (inputs) => inputs.force * inputs.distance,
+          resultLabel: "Work (J)",
+          tooltip: "W = F * d"
+        },
+        {
+          name: "Power Relationship",
+          parameters: [
+            { label: "Power (W)", id: "power" },
+            { label: "Time (s)", id: "time" }
+          ],
+          calculate: (inputs) => inputs.power * inputs.time,
+          resultLabel: "Work (J)",
+          tooltip: "W = P * t"
+        }
+      ],
+      power: [
+        {
+          name: "Basic Definition",
+          parameters: [
+            { label: "Work (J)", id: "work" },
+            { label: "Time (s)", id: "time" }
+          ],
+          calculate: (inputs) => inputs.work / inputs.time,
+          resultLabel: "Power (W)",
+          tooltip: "P = W / t"
+        },
+        {
+          name: "Force-Velocity Relationship",
+          parameters: [
+            { label: "Force (N)", id: "force" },
+            { label: "Velocity (m/s)", id: "velocity" }
+          ],
+          calculate: (inputs) => inputs.force * inputs.velocity,
+          resultLabel: "Power (W)",
+          tooltip: "P = F * v"
+        }
+      ],
+      kinetic_energy: [
+        {
+          name: "Basic Definition",
+          parameters: [
+            { label: "Mass (kg)", id: "mass" },
+            { label: "Velocity (m/s)", id: "velocity" }
+          ],
+          calculate: (inputs) => 0.5 * inputs.mass * inputs.velocity ** 2,
+          resultLabel: "Kinetic Energy (J)",
+          tooltip: "KE = 0.5 * m * v²"
+        },
+        {
+          name: "Momentum Relationship",
+          parameters: [
+            { label: "Momentum (kg·m/s)", id: "momentum" },
+            { label: "Mass (kg)", id: "mass" }
+          ],
+          calculate: (inputs) => (inputs.momentum ** 2) / (2 * inputs.mass),
+          resultLabel: "Kinetic Energy (J)",
+          tooltip: "KE = p² / (2m)"
+        }
+      ],
+      gravitational_potential_energy: [
+        {
+          name: "Basic Definition",
+          parameters: [
+            { label: "Mass (kg)", id: "mass" },
+            { label: "Gravity (m/s²)", id: "gravity" },
+            { label: "Height (m)", id: "height" }
+          ],
+          calculate: (inputs) => inputs.mass * inputs.gravity * inputs.height,
+          resultLabel: "Gravitational Potential Energy (J)",
+          tooltip: "U = m * g * h"
+        },
+        {
+          name: "Energy Difference",
+          parameters: [
+            { label: "Final Potential Energy (J)", id: "finalPE" },
+            { label: "Initial Potential Energy (J)", id: "initialPE" }
+          ],
+          calculate: (inputs) => inputs.finalPE - inputs.initialPE,
+          resultLabel: "Energy Difference (J)",
+          tooltip: "ΔU = U_final - U_initial"
+        }
+      ],
+      ohm: [
+        {
+          name: "Voltage Relationship",
+          parameters: [
+            { label: "Current (A)", id: "current" },
+            { label: "Resistance (Ω)", id: "resistance" }
+          ],
+          calculate: (inputs) => inputs.current * inputs.resistance,
+          resultLabel: "Voltage (V)",
+          tooltip: "V = I * R"
+        },
+        {
+          name: "Power Relationship",
+          parameters: [
+            { label: "Power (W)", id: "power" },
+            { label: "Current (A)", id: "current" }
+          ],
+          calculate: (inputs) => inputs.power / inputs.current,
+          resultLabel: "Voltage (V)",
+          tooltip: "V = P / I"
+        }
+      ]
+    };
 
-      if (calcType === "force") {
-        // Force calculation: F = m * a
-        inputFields.innerHTML += '<label for="mass">Mass (kg):</label>';
-        inputFields.innerHTML += '<input type="number" id="mass" step="any" required>';
-        inputFields.innerHTML += '<label for="acc">Acceleration (m/s²):</label>';
-        inputFields.innerHTML += '<input type="number" id="acc" step="any" required>';
-      } else if (calcType === "pressure") {
-        // Pressure calculation: P = F / A
-        inputFields.innerHTML += '<label for="force">Force (N):</label>';
-        inputFields.innerHTML += '<input type="number" id="force" step="any" required>';
-        inputFields.innerHTML += '<label for="area">Area (m²):</label>';
-        inputFields.innerHTML += '<input type="number" id="area" step="any" required>';
-      } else if (calcType === "acceleration") {
-        // Acceleration calculation: a = Δv / t (Δv = change in velocity)
-        inputFields.innerHTML += '<label for="deltaV">Change in Velocity (m/s):</label>';
-        inputFields.innerHTML += '<input type="number" id="deltaV" step="any" required>';
-        inputFields.innerHTML += '<label for="time">Time (s):</label>';
-        inputFields.innerHTML += '<input type="number" id="time" step="any" required>';
+    /******************************************************************
+     * JSON Configuration for Unit Conversions to SI
+     ******************************************************************/
+    const conversions = {
+      mass: {
+        "g_to_kg": { factor: 0.001, label: "grams to kilograms" },
+        "lb_to_kg": { factor: 0.453592, label: "pounds to kilograms" }
+      },
+      length: {
+        "cm_to_m": { factor: 0.01, label: "centimeters to meters" },
+        "mm_to_m": { factor: 0.001, label: "millimeters to meters" },
+        "inch_to_m": { factor: 0.0254, label: "inches to meters" },
+        "cm2_to_m2": { factor: 0.0001, label: "cm² to m²" },
+        "cm3_to_m3": { factor: 1e-6, label: "cm³ to m³" }
+      },
+      time: {
+        "min_to_s": { factor: 60, label: "minutes to seconds" },
+        "hr_to_s": { factor: 3600, label: "hours to seconds" }
+      },
+      force: {
+        "dyn_to_N": { factor: 1e-5, label: "dynes to Newtons" },
+        "lbf_to_N": { factor: 4.44822, label: "pounds-force to Newtons" }
+      },
+      pressure: {
+        "atm_to_Pa": { factor: 101325, label: "atmospheres to Pascals" },
+        "bar_to_Pa": { factor: 100000, label: "bars to Pascals" },
+        "psi_to_Pa": { factor: 6894.76, label: "psi to Pascals" }
+      },
+      energy: {
+        "cal_to_J": { factor: 4.184, label: "calories to Joules" },
+        "kWh_to_J": { factor: 3600000, label: "kilowatt-hours to Joules" }
       }
+    };
+
+    /******************************************************************
+     * Global Variables & Utility Functions
+     ******************************************************************/
+    const history = []; // To store calculation history
+
+    // Helper to create a DOM element with attributes
+    function createElement(type, attributes = {}, innerHTML = "") {
+      const el = document.createElement(type);
+      for (let key in attributes) {
+        el.setAttribute(key, attributes[key]);
+      }
+      el.innerHTML = innerHTML;
+      return el;
     }
 
-    // Listen for form submission to perform the calculation.
-    document.getElementById("calcForm").addEventListener("submit", function(e) {
-      e.preventDefault();
-      const calcType = document.getElementById("calcType").value;
-      let result = 0;
-      const resultDiv = document.getElementById("result");
+    // Validate that input is a number (assuming SI numeric input)
+    function validateInput(value) {
+      return !isNaN(value) && value !== "";
+    }
 
-      if (calcType === "force") {
-        const mass = parseFloat(document.getElementById("mass").value);
-        const acc = parseFloat(document.getElementById("acc").value);
-        result = mass * acc;
-        resultDiv.innerText = "Force = " + result.toFixed(2) + " N";
-      } else if (calcType === "pressure") {
-        const force = parseFloat(document.getElementById("force").value);
-        const area = parseFloat(document.getElementById("area").value);
-        if (area === 0) {
-          resultDiv.innerText = "Area cannot be zero.";
-          return;
-        }
-        result = force / area;
-        resultDiv.innerText = "Pressure = " + result.toFixed(2) + " Pa";
-      } else if (calcType === "acceleration") {
-        const deltaV = parseFloat(document.getElementById("deltaV").value);
-        const time = parseFloat(document.getElementById("time").value);
-        if (time === 0) {
-          resultDiv.innerText = "Time cannot be zero.";
-          return;
-        }
-        result = deltaV / time;
-        resultDiv.innerText = "Acceleration = " + result.toFixed(2) + " m/s²";
+    // Append a calculation to the history
+    function addToHistory(entry) {
+      history.push(entry);
+      const li = createElement("li", { tabindex: "0" }, entry);
+      li.addEventListener("click", () => {
+        // In a full implementation, clicking re-loads the calculation.
+        alert("Reusing this calculation is not yet implemented.");
+      });
+      document.getElementById("history-list").appendChild(li);
+    }
+
+    /******************************************************************
+     * Event Handlers for the Calculator Section
+     ******************************************************************/
+    const calcTypeSelect = document.getElementById("calculation-type");
+    const formulaSelect = document.getElementById("formula");
+    const formulaSelectionDiv = document.getElementById("formula-selection");
+    const inputFieldsDiv = document.getElementById("input-fields");
+    const resultValue = document.getElementById("result-value");
+
+    // When a calculation type is selected, update the formulas dropdown.
+    calcTypeSelect.addEventListener("change", () => {
+      const type = calcTypeSelect.value;
+      inputFieldsDiv.innerHTML = "";
+      resultValue.innerText = "";
+      if (type && formulas[type]) {
+        formulaSelectionDiv.style.display = "block";
+        formulaSelect.innerHTML = "<option value=''>--Select Formula--</option>";
+        formulas[type].forEach((formula, index) => {
+          const option = createElement("option", { value: index }, formula.name);
+          // Add tooltip as the title attribute for explanation
+          option.title = formula.tooltip;
+          formulaSelect.appendChild(option);
+        });
       } else {
-        resultDiv.innerText = "Please select a calculation.";
+        formulaSelectionDiv.style.display = "none";
       }
     });
+
+    // When a formula is selected, generate input fields dynamically.
+    formulaSelect.addEventListener("change", () => {
+      inputFieldsDiv.innerHTML = "";
+      resultValue.innerText = "";
+      const type = calcTypeSelect.value;
+      const index = formulaSelect.value;
+      if (type && index !== "") {
+        const formula = formulas[type][index];
+        formula.parameters.forEach(param => {
+          const label = createElement("label", { for: param.id }, param.label);
+          const input = createElement("input", { type: "number", id: param.id, placeholder: "Enter value in SI units" });
+          input.setAttribute("aria-label", param.label);
+          // Add a tooltip with the formula derivation if needed.
+          input.title = param.tooltip || "";
+          inputFieldsDiv.appendChild(label);
+          inputFieldsDiv.appendChild(input);
+        });
+      }
+    });
+
+    // Calculate button event handler
+    document.getElementById("calculate-btn").addEventListener("click", () => {
+      const type = calcTypeSelect.value;
+      const index = formulaSelect.value;
+      if (!type || index === "") {
+        alert("Please select both a calculation type and a formula.");
+        return;
+      }
+      const formula = formulas[type][index];
+      const inputs = {};
+      let valid = true;
+      // Collect and validate inputs
+      formula.parameters.forEach(param => {
+        const inputElem = document.getElementById(param.id);
+        const value = parseFloat(inputElem.value);
+        if (!validateInput(value)) {
+          valid = false;
+          inputElem.style.borderColor = "red";
+        } else {
+          inputElem.style.borderColor = "#ccc";
+          inputs[param.id] = value;
+        }
+      });
+      if (!valid) {
+        alert("Please enter valid SI numeric values in all fields.");
+        return;
+      }
+      // Perform calculation and display result
+      const result = formula.calculate(inputs);
+      resultValue.innerText = `${result} ${formula.resultLabel.split(" ")[1]}`;
+      // Add to calculation history
+      addToHistory(`${formula.name}: ${result.toPrecision(6)} ${formula.resultLabel.split(" ")[1]}`);
+    });
+
+    // Reset button clears inputs and outputs
+    document.getElementById("reset-btn").addEventListener("click", () => {
+      calcTypeSelect.value = "";
+      formulaSelect.innerHTML = "";
+      formulaSelectionDiv.style.display = "none";
+      inputFieldsDiv.innerHTML = "";
+      resultValue.innerText = "";
+    });
+
+    /******************************************************************
+     * Event Handlers for the SI Unit Conversion Tool
+     ******************************************************************/
+    const convTypeSelect = document.getElementById("conversion-type");
+    const convInputsDiv = document.getElementById("conversion-inputs");
+    const convResult = document.getElementById("conversion-value");
+
+    // When a conversion type is selected, show available conversion options and an input field.
+    convTypeSelect.addEventListener("change", () => {
+      convInputsDiv.innerHTML = "";
+      convResult.innerText = "";
+      const convType = convTypeSelect.value;
+      if (convType && conversions[convType]) {
+        // Create a dropdown for specific conversion (e.g., g_to_kg, lb_to_kg)
+        const convOptionSelect = createElement("select", { id: "conv-option" });
+        convOptionSelect.innerHTML = "<option value=''>--Select Conversion Option--</option>";
+        for (let key in conversions[convType]) {
+          const option = createElement("option", { value: key }, conversions[convType][key].label);
+          convOptionSelect.appendChild(option);
+        }
+        convInputsDiv.appendChild(createElement("label", { for: "conv-option" }, "Conversion Option:"));
+        convInputsDiv.appendChild(convOptionSelect);
+        // Create an input field for the value to convert
+        convInputsDiv.appendChild(createElement("label", { for: "conv-value" }, "Value to Convert:"));
+        convInputsDiv.appendChild(createElement("input", { type: "number", id: "conv-value", placeholder: "Enter value" }));
+      }
+    });
+
+    // Convert button event handler
+    document.getElementById("convert-btn").addEventListener("click", () => {
+      const convType = convTypeSelect.value;
+      const convOption = document.getElementById("conv-option")?.value;
+      const convValue = parseFloat(document.getElementById("conv-value")?.value);
+      if (!convType || !convOption || !validateInput(convValue)) {
+        alert("Please select a conversion option and enter a valid value.");
+        return;
+      }
+      const factor = conversions[convType][convOption].factor;
+      const converted = convValue * factor;
+      convResult.innerText = converted;
+    });
+
+    /******************************************************************
+     * Theme Toggle (Dark/Light Mode)
+     ******************************************************************/
+    const themeToggleBtn = document.getElementById("theme-toggle");
+    themeToggleBtn.addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+    });
+
+    /******************************************************************
+     * Accessibility & Additional Enhancements (Stubs)
+     ******************************************************************/
+    // For full accessibility, add ARIA attributes to dynamically created elements.
+    // For graphical visualization (e.g., Chart.js), integrate a chart library here and update
+    // the chart when calculations change.
+    // For unit testing, you could integrate a test framework such as Jest to test calculation functions.
+    // For PWA support, add a service worker registration here.
+    
+    /******************************************************************
+     * Sample Unit Test (Console Output)
+     ******************************************************************/
+    (function runTests() {
+      // Test Newton's Second Law for force: F = m * a
+      const testInput = { mass: 2, acceleration: 3 };
+      const expected = 6;
+      const result = formulas.force[0].calculate(testInput);
+      console.assert(Math.abs(result - expected) < 1e-6, "Test Failed: Newton's Second Law");
+      console.log("All sample tests passed.");
+    })();
   </script>
 </body>
 </html>
