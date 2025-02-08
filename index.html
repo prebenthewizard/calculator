@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Science Calculator</title>
+  <style>
+    /* Minimalistic design */
+    body {
+      margin: 0;
+      padding: 0;
+      background: #f9f9f9;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: #fff;
+      padding: 20px 25px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      width: 300px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 22px;
+      color: #333;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      color: #555;
+    }
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 10px;
+      background: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .result {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 18px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Science Calculator</h1>
+    <form id="calcForm">
+      <label for="calcType">Select Calculation:</label>
+      <select id="calcType" onchange="updateFields()">
+        <option value="">--Choose--</option>
+        <option value="force">Force (F = m × a)</option>
+        <option value="pressure">Pressure (P = F / A)</option>
+        <option value="acceleration">Acceleration (a = Δv / t)</option>
+      </select>
+      <div id="inputFields"></div>
+      <button type="submit">Calculate</button>
+    </form>
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    // Function to update the input fields based on the selected calculation.
+    function updateFields() {
+      const calcType = document.getElementById("calcType").value;
+      const inputFields = document.getElementById("inputFields");
+      inputFields.innerHTML = ""; // Clear previous fields
+
+      if (calcType === "force") {
+        // Force calculation: F = m * a
+        inputFields.innerHTML += '<label for="mass">Mass (kg):</label>';
+        inputFields.innerHTML += '<input type="number" id="mass" step="any" required>';
+        inputFields.innerHTML += '<label for="acc">Acceleration (m/s²):</label>';
+        inputFields.innerHTML += '<input type="number" id="acc" step="any" required>';
+      } else if (calcType === "pressure") {
+        // Pressure calculation: P = F / A
+        inputFields.innerHTML += '<label for="force">Force (N):</label>';
+        inputFields.innerHTML += '<input type="number" id="force" step="any" required>';
+        inputFields.innerHTML += '<label for="area">Area (m²):</label>';
+        inputFields.innerHTML += '<input type="number" id="area" step="any" required>';
+      } else if (calcType === "acceleration") {
+        // Acceleration calculation: a = Δv / t (Δv = change in velocity)
+        inputFields.innerHTML += '<label for="deltaV">Change in Velocity (m/s):</label>';
+        inputFields.innerHTML += '<input type="number" id="deltaV" step="any" required>';
+        inputFields.innerHTML += '<label for="time">Time (s):</label>';
+        inputFields.innerHTML += '<input type="number" id="time" step="any" required>';
+      }
+    }
+
+    // Listen for form submission to perform the calculation.
+    document.getElementById("calcForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const calcType = document.getElementById("calcType").value;
+      let result = 0;
+      const resultDiv = document.getElementById("result");
+
+      if (calcType === "force") {
+        const mass = parseFloat(document.getElementById("mass").value);
+        const acc = parseFloat(document.getElementById("acc").value);
+        result = mass * acc;
+        resultDiv.innerText = "Force = " + result.toFixed(2) + " N";
+      } else if (calcType === "pressure") {
+        const force = parseFloat(document.getElementById("force").value);
+        const area = parseFloat(document.getElementById("area").value);
+        if (area === 0) {
+          resultDiv.innerText = "Area cannot be zero.";
+          return;
+        }
+        result = force / area;
+        resultDiv.innerText = "Pressure = " + result.toFixed(2) + " Pa";
+      } else if (calcType === "acceleration") {
+        const deltaV = parseFloat(document.getElementById("deltaV").value);
+        const time = parseFloat(document.getElementById("time").value);
+        if (time === 0) {
+          resultDiv.innerText = "Time cannot be zero.";
+          return;
+        }
+        result = deltaV / time;
+        resultDiv.innerText = "Acceleration = " + result.toFixed(2) + " m/s²";
+      } else {
+        resultDiv.innerText = "Please select a calculation.";
+      }
+    });
+  </script>
+</body>
+</html>
